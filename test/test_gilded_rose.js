@@ -193,11 +193,10 @@ describe('Gilded Rose Tests', () => {
   });
 
   // Test cases for new features
-  // This will fail for now as the conjured items category is not yet implemented
   describe('Conjured Items Tests', () => {
 
     it('Conjured items degrade in Quality twice as fast as normal items', () => {
-      const item = new Item('Conjured', 2, 3);
+      const item = new Item('Conjured Mana Cake', 2, 3);
       const gildedRose = new Shop([item]);
       const [updatedItem] = gildedRose.updateQuality();
       expect(updatedItem.sellIn).to.equal(1);
@@ -205,7 +204,7 @@ describe('Gilded Rose Tests', () => {
     });
 
     it('if conjured item sellIn date has passed, quality degrades twice as fast as normal items', () => {
-      const item = new Item('Conjured', 0, 8);
+      const item = new Item('Conjured Mana Cake', 0, 8);
       expect(item).to.exist;
       const gildedRose = new Shop([item]);
       const [updatedItem] = gildedRose.updateQuality();
@@ -215,7 +214,7 @@ describe('Gilded Rose Tests', () => {
     });
 
     it('Conjured item quality never be negative', () => {
-      const item = new Item('Conjured', -1, 2);
+      const item = new Item('Conjured Mana Cake', -1, 3);
       const gildedRose = new Shop([item]);
       const [updatedItem] = gildedRose.updateQuality();
       expect(updatedItem.sellIn).to.equal(-2);
