@@ -1,11 +1,246 @@
-var {expect} = require('chai');
-var {Shop, Item} = require('../src/gilded_rose.js');
-describe("Gilded Rose", function() {
+var { expect } = require('chai');
+var { Shop, Item } = require('../src/gilded_rose.js');
+describe('Gilded Rose Tests', () => {
 
-  it("should foo", function() {
-    const gildedRose = new Shop([ new Item("foo", 0, 0) ]);
-    const items = gildedRose.updateQuality();
-    expect(items[0].name).to.equal("fixme");
+  // Test cases for Existing features
+  describe('Normal Items Tests', () => {
+
+    it('Should create item', () => {
+      const item = new Item('milk', 5, 10);
+      expect(item.name).to.exist.and.that.equal('milk');
+      expect(item.sellIn).to.exist.and.that.equal(5);
+      expect(item.quality).to.exist.and.that.equal(10);
+    });
+
+    it('Item sellIn and quality value decreases by 1 at the end of each day', () => {
+      const item = new Item('butter', 2, 4);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(1);
+      expect(updatedItem.quality).to.equal(3);
+    });
+
+    it('item quality never be negative', () => {
+      const item = new Item('egg', 1, 0);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(0);
+      expect(updatedItem.quality).to.not.lessThan(0);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+    it('item quality never be negative even if the sellin day is negative', () => {
+      const item = new Item('egg', 0, 0);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.not.lessThan(0);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+    it('Once the item sellIn date has passed, quality degrades twice as fast', () => {
+      const item = new Item('kova', 0, 4);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.equal(2);
+    });
+
+
+    it('Once the item sellIn date has passed, quality degrades twice as fast but it is never negative', () => {
+      const item = new Item('cheese', 0, 1);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.not.lessThan(0);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+
   });
+
+  describe('Aged Brie Tests', () => {
+
+    it('Aged Brie actually increases in quality the older it gets', () => {
+      const item = new Item('Aged Brie', 2, 0);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(1);
+      expect(updatedItem.quality).to.equal(1);
+    });
+
+    it('The Quality of Aged Brie is never more than 50', () => {
+      const item = new Item('Aged Brie', 1, 50);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(0);
+      expect(updatedItem.quality).to.equal(50);
+    });
+
+    it('Once the Aged Brie sellIn date has passed, quality increases twice as fast', () => {
+      const item = new Item('Aged Brie', 0, 3);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.equal(5);
+    });
+
+    it('Once the Aged Brie sellIn date has passed, quality increases twice as fast but is never more than 50', () => {
+      const item = new Item('Aged Brie', -1, 49);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-2);
+      expect(updatedItem.quality).to.equal(50);
+    });
+
+  });
+
+  describe('Sulfuras Tests', () => {
+
+    it('Sulfuras sellIn and quality never has to be alters', () => {
+      const item = new Item('Sulfuras, Hand of Ragnaros', 2, 4);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(2);
+      expect(updatedItem.quality).to.equal(4);
+    });
+
+    it('Sulfuras quality can be more than 50', () => {
+      const item = new Item('Sulfuras, Hand of Ragnaros', 0, 80);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(0);
+      expect(updatedItem.quality).to.equal(80);
+    });
+
+    it('Sulfuras sellIn never alters even if the sellIn is negative', () => {
+      const item = new Item('Sulfuras, Hand of Ragnaros', -1, 5);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.equal(5);
+    });
+
+  });
+
+  describe('Backstage Passes Tests', () => {
+
+    it('Backstage passes increases in quality as its SellIn value approaches', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 11, 15);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(10);
+      expect(updatedItem.quality).to.equal(16);
+    });
+
+    it('Backstage passes quality increases by 2 when there are 10 days', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 10, 9);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem).to.exist;
+      expect(updatedItem.sellIn).to.equal(9);
+      expect(updatedItem.quality).to.equal(11);
+    });
+
+    it('Backstage passes quality increases by 2 when there are 10 days or less', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 9, 8);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(8);
+      expect(updatedItem.quality).to.equal(10);
+    });
+
+    it('Backstage passes quality increases by 3 when there are 5 days', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 5, 7);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(4);
+      expect(updatedItem.quality).to.equal(10);
+    });
+
+    it('Backstage passes quality increases by 3 when there are 5 days or less', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 4, 7);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(3);
+      expect(updatedItem.quality).to.equal(10);
+    });
+
+    it('Backstage passes quality nevers increases more than 50', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 3, 48);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(2);
+      expect(updatedItem.quality).to.equal(50);
+    });
+  
+    it('Backstage passes quality drops to 0 after the concert', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', 0, 7);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+    it('Backstage passes quality drops to 0 after the concert even if the sellIn is negative', () => {
+      const item = new Item('Backstage passes to a TAFKAL80ETC concert', -2, 7);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-3);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+  });
+
+  // Test cases for new features
+  // This will fail for now as the conjured items category is not yet implemented
+  describe('Conjured Items Tests', () => {
+
+    it('Conjured items degrade in Quality twice as fast as normal items', () => {
+      const item = new Item('Conjured', 2, 3);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(1);
+      expect(updatedItem.quality).to.equal(1);
+    });
+
+    it('if conjured item sellIn date has passed, quality degrades twice as fast as normal items', () => {
+      const item = new Item('Conjured', 0, 8);
+      expect(item).to.exist;
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem).to.exist;
+      expect(updatedItem.sellIn).to.equal(-1);
+      expect(updatedItem.quality).to.equal(4);
+    });
+
+    it('Conjured item quality never be negative', () => {
+      const item = new Item('Conjured', -1, 2);
+      const gildedRose = new Shop([item]);
+      const [updatedItem] = gildedRose.updateQuality();
+      expect(updatedItem.sellIn).to.equal(-2);
+      expect(updatedItem.quality).to.equal(0);
+    });
+
+  });
+
+ 
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
 
 });
